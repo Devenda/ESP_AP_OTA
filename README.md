@@ -1,2 +1,2 @@
-# ESPWiFiDirect
-Testing the ESP8266 using WiFiDirect
+# ESPAP
+Testing the ESP8266: Making it an AP
