@@ -11,7 +11,6 @@ const char* passwordOTA = "MFwkt6cvewxf";
 //Setup AP
 const char* ssidAP = "TinusESP8266";
 const char* passwordAP = "123456789";
-IPAddress apIP(192, 168, 1, 1);
 
 WiFiServer server(80);
 
@@ -36,10 +35,10 @@ void blinkLED(){
 //setup as Access Point
 void setupAP(){
   WiFi.mode(WIFI_AP);
-  //WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+  WiFi.softAPConfig(IPAddress(192, 168, 0, 1), IPAddress(192, 168, 0, 1), IPAddress(255, 255, 255, 0));
   WiFi.softAP(ssidAP, passwordAP);
   server.begin();
-  Serial.println(WiFi.localIP());
+  Serial.println(WiFi.softAPIP());
 }
 
 //Connect to network
@@ -92,23 +91,14 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Booting");
 
-  //connectToAP();
-  //setupOTA();
-
   //IO
   pinMode(2, OUTPUT);
   pinMode(14, INPUT);
 }
 
 void loop() {
-  //ArduinoOTA.handle();
-  //Serial.println("Looping");
-  // Serial.println(digitalRead(14));
-  //GPIO14
+  //OTA setup
   if (digitalRead(14) == 0) {
-    Serial.println("OTA Update");
-    Serial.println(WiFi.localIP());
-    //OTA setup
     if (!OTAsetupDone) {
       Serial.println("OTA Setup");
       connectToAP();
@@ -116,16 +106,21 @@ void loop() {
       OTAsetupDone = true;
       APsetupDone = false;
     }
+    Serial.println("OTA Update");
+    Serial.println(WiFi.localIP());
+    blinkLED();
     ArduinoOTA.handle();
   }
+
+  //AP setup
   if (digitalRead(14) == 1){
-    //AP setup
     if (!APsetupDone) {
+      digitalWrite(2, HIGH);
       Serial.println("AP Setup");
       setupAP();
       APsetupDone = true;
       OTAsetupDone = false;
     }
-    blinkLED();
+    Serial.println(WiFi.softAPIP());
   }
 }
