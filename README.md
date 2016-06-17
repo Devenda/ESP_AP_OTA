@@ -1,2 +1,2 @@
-# ESPAP
-Testing the ESP8266: Making it an AP
+# ESPAP_OTA Framework
+Testing the ESP8266: Making it an AP and enabling OTA
