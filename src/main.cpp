@@ -96,6 +96,62 @@ void setup() {
   pinMode(14, INPUT);
 }
 
+void webServer(){
+  // Check if a client has connected
+  WiFiClient client = server.available();
+  if (!client) {
+    return;
+  }
+
+  // Read the first line of the request
+  String req = client.readStringUntil('\r');
+  Serial.println(req);
+  client.flush();
+
+  // Match the request
+  int val = -1; // We'll use 'val' to keep track of both the
+                // request type (read/set) and value if set.
+  if (req.indexOf("/led/0") != -1)
+    val = 0; // Will write LED low
+  else if (req.indexOf("/led/1") != -1)
+    val = 1; // Will write LED high
+  // Otherwise request will be invalid. We'll say as much in HTML
+
+  // Set GPIO5 according to the request
+  if (val == 0){
+    digitalWrite(2, HIGH);
+  }
+  if (val == 1) {
+    digitalWrite(2, LOW);
+  }
+
+  client.flush();
+
+  // Prepare the response. Start with the common header:
+  String s = "HTTP/1.1 200 OK\r\n";
+  s += "Content-Type: text/html\r\n\r\n";
+  s += "<!DOCTYPE HTML>\r\n<html>\r\n";
+  // If we're setting the LED, print out a message saying we did
+  if (val >= 0)
+  {
+    s += "LED is now ";
+    s += (val)?"on":"off";
+  }
+  else
+  {
+    s += "Invalid Request.<br> Try /led/1 or /led/0";
+  }
+  s += "</html>\n";
+
+  // Send the response to the client
+  client.print(s);
+  delay(1);
+  Serial.println("Client disonnected");
+
+  // The client will actually be disconnected
+  // when the function returns and 'client' object is detroyed
+}
+
 void loop() {
   //OTA setup
   if (digitalRead(14) == 0) {
@@ -121,6 +177,7 @@ void loop() {
       APsetupDone = true;
       OTAsetupDone = false;
     }
-    Serial.println(WiFi.softAPIP());
+    //Serial.println(WiFi.softAPIP());
+    webServer();
   }
 }
